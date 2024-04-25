@@ -1,7 +1,7 @@
 <?php
 // Conexión a la base de datos
-$serverName = "localhost";
-$connectionInfo = array("Database"=>"chatbot", "UID"=>"sa", "PWD"=>"123456");
+$serverName = "161.132.47.189";
+$connectionInfo = array("Database"=>"BD_COLEGIO", "UID"=>"sa", "PWD"=>"Sebas123-");
 $conn = sqlsrv_connect( $serverName, $connectionInfo);
 
 // Configuración de la codificación de caracteres utf-8
