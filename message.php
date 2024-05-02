@@ -1,37 +1,24 @@
 <?php
-// Conexión a la base de datos
-$serverName = "161.132.47.189";
-$connectionInfo = array("Database"=>"BD_COLEGIO", "UID"=>"sa", "PWD"=>"Sebas123-");
-$conn = sqlsrv_connect( $serverName, $connectionInfo);
+// conectando a la base de datos
+$conn = mysqli_connect("localhost", "root", "", "chatbot") or die("Database Error");
 
-// Configuración de la codificación de caracteres utf-8
-sqlsrv_query($conn, "SET NAMES 'utf8'");
+// obteniendo el mensaje del usuario a través de ajax
+$getMesg = mysqli_real_escape_string($conn, $_POST['text']);
 
-// Obteniendo el mensaje del usuario a través de AJAX
-$getMesg = $_POST['text'];
-$getMesg = str_replace("'", "''", $getMesg); // Evitar errores de SQL injection
+//comprobando la consulta del usuario a la consulta de la base de datos
+$check_data = "SELECT replies FROM chatbot WHERE queries LIKE '%$getMesg%'";
+$run_query = mysqli_query($conn, $check_data) or die("Error");
 
-// Llamando al procedimiento almacenado
-$sql = "{CALL GetReplyForMessage(?)}";
-$params = array(&$getMesg);
-$stmt = sqlsrv_prepare($conn, $sql, $params);
-
-if(sqlsrv_execute($stmt)) {
-    // Si la consulta tiene filas, mostrar la respuesta
-    if(sqlsrv_has_rows($stmt)) {
-        $fetch_data = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
-        $reply = $fetch_data['replies'];
-        echo $reply;
-    } else {
-        echo "¡Lo siento, no puedo ayudarte con este inconveniente! Favor comunícate con el administrador en el siguiente enlace:
-    
-        </br><a href='https://wa.me/51940759137?text=LEDER tengo una duda... Culturisame'>Contacto</a>";
-    }
+// si la consulta del usuario coincide con la consulta de la base de datos, mostraremos la respuesta; de lo contrario, irá a otra declaración
+if (mysqli_num_rows($run_query) > 0) {
+    //recuperando la reproducción de la base de datos de acuerdo con la consulta del usuario
+    $fetch_data = mysqli_fetch_assoc($run_query);
+    //almacenando la respuesta a una variable que enviaremos a ajax
+    $replay = $fetch_data['replies'];
+    echo $replay;
 } else {
-    echo "Error al ejecutar el procedimiento almacenado.";
+    echo "¡Lo siento, no puedo ayudarte con este inconveniente! Favor comunícate con el administrador en el siguiente enlace:
+    
+    </br><a href='https://wa.me/51940759137?text=LEDER tengo una duda... Culturisame'>Contacto</a>";
 }
-
-// Liberar recursos
-sqlsrv_free_stmt($stmt);
-sqlsrv_close($conn);
 ?>
